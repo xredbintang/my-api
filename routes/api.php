@@ -19,5 +19,7 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 Route::middleware(['auth:api'])->group(function(){
     Route::apiResource('/products', ProductController::class);
     Route::apiResource('/categories', Categories::class);
+    Route::post('/auth/logout',[AuthController::class,'logout']);
+
 });
 

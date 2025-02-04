@@ -6,14 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Models\CategoriesModel;
 use Exception;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 class Categories extends Controller
 {
     public function index () {
 		try {
-            $categories = CategoriesModel::getCategory();
+            $categories = Cache::remember('categories', 10, function(){
+                return CategoriesModel::all();
+            });
+            // $categories = CategoriesModel::getCategory();
             $response = [
                 'success' => true,
                 'message' => 'Successfully get categories data.',
@@ -35,7 +38,10 @@ class Categories extends Controller
 
     public function show (int $category_id){
         try{
-            $categories = CategoriesModel::getCategoryById($category_id);
+            $categories = Cache::remember('categoriesid',10,function() use ($category_id){
+                return CategoriesModel::find($category_id);  
+            });
+            // $categories = CategoriesModel::getCategoryById($category_id);
             $response = [
                 'succes' => true,
                 'message' => 'Succesfully get category data',
@@ -55,6 +61,7 @@ class Categories extends Controller
 
     public function store(Request $request){
         try{
+            Cache::forget('categories');
             $validator = Validator::make($request->all(),[
                 'category_name' => 'required|string|max:100'
             ]);
@@ -92,6 +99,8 @@ class Categories extends Controller
 
     public function update(Request $request,int $category_id){
         try{
+            Cache::forget('categories');
+            Cache::forget('categoriesid');
             $validator = Validator::make($request->all(),[
                 'category_name' => 'required|string|max:100'
             ]);
@@ -130,6 +139,8 @@ class Categories extends Controller
         try{
             $categories = CategoriesModel::deletCategory($category_id);
             if($categories){
+                Cache::forget('categories');
+                Cache::forget('categoriesid');
                 $response = [
                     'success' => 'true',
                     'message' => 'Successfully delete category data',

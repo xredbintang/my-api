@@ -69,5 +69,29 @@ class AuthController extends Controller
             'accestoken' => $token
         ];
         return response()->json($response,201);
+        // return redirect()->route('dashboard')->with('token',$token);
+    }
+    public function logout(Request $request)
+{
+    try {
+        auth('api')->logout();
+        auth('api')->invalidate(true);        
+        return response()->json([
+            'success' => true,
+            'message' => 'Successfully logged out',
+            'data' => null
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to logout',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+    public function dashboard(){
+        
+        return view('welcome');
     }
 }

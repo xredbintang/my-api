@@ -13,7 +13,10 @@ class ProductController extends Controller
 {
     public function index () {
 		try {
-            $products =  ProductModel::all();
+            $products =  Cache::remember('products',10, function(){
+                return ProductModel::all();
+            });
+            // $products = ProductModel::all();
             $response = [
                 'success' => true,
                 'message' => 'Successfully get products data.',
@@ -35,7 +38,10 @@ class ProductController extends Controller
 	
 	public function show (int $product_id) {
 		try {
-            $products = ProductModel::find($product_id);
+            $products =  Cache::remember('productsid',10, function() use ($product_id){
+                return ProductModel::find($product_id);
+            });
+            // $products = ProductModel::find($product_id);
             $response = array(
                 'success' => true,
                 'message' => 'Successfully get products data.',
@@ -57,6 +63,8 @@ class ProductController extends Controller
 	
 	public function store (Request $request) {
 		try {
+            Cache::forget('products');
+
             $validator = Validator::make($request->all(), [
                 'product_name' => 'required|string|max:100',
                 'product_category_id' => 'required|exists:categories,category_id',
@@ -97,6 +105,9 @@ class ProductController extends Controller
 	
 	public function update (Request $request, int $product_id) {
 		try {
+            Cache::forget('products');
+            Cache::forget('productsid');
+
             $validator = Validator::make($request->all(), [
                 'product_name' => 'required|string|max:100',
                 'product_category_id' => 'required|exists:categories,category_id',
@@ -154,6 +165,9 @@ class ProductController extends Controller
             $product = ProductModel::find($product_id);
 
             if($product){
+                Cache::forget('products');
+                Cache::forget('productsid');
+
                 $product->delete();
                 $response = [
                     'success' => 'true',
