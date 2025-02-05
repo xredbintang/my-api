@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -66,9 +67,12 @@ class AuthController extends Controller
             'success' => true,
             'message' => 'Succesfully Login',
             'data' => auth()->guard('api')->user(),
-            'accestoken' => $token
+            'accestoken' => $token,
+            'refresh_token' => auth()->guard('api')->refresh(),
+            'token_type' => 'bearer',
+            'expires_in' => auth()->guard('api')->factory()->getTTL() * 60 
         ];
-        return response()->json($response,201);
+        return response()->json($response,200);
         // return redirect()->route('dashboard')->with('token',$token);
     }
     public function logout(Request $request)
@@ -89,6 +93,29 @@ class AuthController extends Controller
         ], 500);
     }
 }
+
+public function refreshToken() {
+    try {
+        // Cek apakah token ada di header Authorization
+        $token = JWTAuth::parseToken()->refresh();
+        $response = [
+            'success' => true,
+            'message' => 'Token refreshed successfully',
+            'data' => null,
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => JWTAuth::factory()->getTTL() * 60, // expired in minutes
+        ];
+        return response()->json($response, 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to refresh token',
+            'error' => $e->getMessage()
+        ], 401);
+    }
+}
+
 
     public function dashboard(){
         

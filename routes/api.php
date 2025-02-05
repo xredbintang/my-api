@@ -15,6 +15,7 @@ Route::apiResource('/categories', Categories::class);
 
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
+Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
 
 Route::middleware(['auth:api'])->group(function(){
     Route::apiResource('/products', ProductController::class);
