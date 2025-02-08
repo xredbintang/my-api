@@ -54,7 +54,7 @@ class AuthController extends Controller
 
         $credential = $request->only('email','password');
 
-        if(!$token = auth()->guard('api')->attempt($credential)){
+        if(!$token = JWTAuth::attempt($credential)){
             $response = [
                 'success' => false,
                 'message' => 'Wrong username or password',
@@ -63,14 +63,15 @@ class AuthController extends Controller
             return response()->json($response,400);
         }
 
+        $refreshtoken = JWTAuth::fromUser(auth()->user());
         $response = [
             'success' => true,
             'message' => 'Succesfully Login',
             'data' => auth()->guard('api')->user(),
             'accestoken' => $token,
-            'refresh_token' => auth()->guard('api')->refresh(),
+            'refresh_token' => $refreshtoken,
             'token_type' => 'bearer',
-            'expires_in' => auth()->guard('api')->factory()->getTTL() * 60 
+            'expires_in' => JWTAuth::factory()->getTTL() * 60 
         ];
         return response()->json($response,200);
         // return redirect()->route('dashboard')->with('token',$token);
@@ -96,15 +97,15 @@ class AuthController extends Controller
 
 public function refreshToken() {
     try {
-        // Cek apakah token ada di header Authorization
-        $token = JWTAuth::parseToken()->refresh();
+        
+        $newtoken = JWTAuth::parseToken()->refresh();
         $response = [
             'success' => true,
             'message' => 'Token refreshed successfully',
             'data' => null,
-            'access_token' => $token,
+            'access_token' => $newtoken,
             'token_type' => 'bearer',
-            'expires_in' => JWTAuth::factory()->getTTL() * 60, // expired in minutes
+            'expires_in' => JWTAuth::factory()->getTTL() * 60, 
         ];
         return response()->json($response, 200);
     } catch (\Exception $e) {

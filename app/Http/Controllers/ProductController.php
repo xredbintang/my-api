@@ -182,7 +182,6 @@ class ProductController extends Controller
                 );
             }
             
-
             return response()->json($response, $product ? 200 : 400 );
         } catch (Exception $error) {
             $response = array(
